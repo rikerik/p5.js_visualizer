@@ -2,9 +2,9 @@ var song;
 var fft;
 var img;
 var particles = [];
+var fileInput;
 
 function preload() {
-  song = loadSound('assets/grit.mp3');
   img = loadImage('assets/abstract.gif');
 }
 
@@ -16,8 +16,16 @@ function setup() {
   fft = new p5.FFT(0.3);
   img.filter(BLUR, 6);
   noLoop();
-}
 
+  fileInput = createFileInput(handleFile);
+  fileInput.position(20, 20);
+  fileInput.class('file-input');
+
+  // Check if the audio is playing initially
+  if (!song || !song.isPlaying()) {
+    fileInput.removeClass('hide');
+  }
+}
 
 function windowResized() {
   resizeCanvas(windowWidth, windowHeight);
@@ -73,16 +81,36 @@ function draw() {
       particles.splice(i, 1);
     }
   }
+
+  // Check if the audio is playing and update the file input visibility
+  if (song && song.isPlaying()) {
+    fileInput.addClass('hide');
+  } else {
+    fileInput.removeClass('hide');
+  }
 }
 
 function mouseClicked() {
-  if (song.isPlaying()) {
+  if (song && song.isPlaying()) {
     song.pause();
     noLoop();
-  } else {
+  } else if (song) {
     song.play();
     loop();
   }
+}
+
+function handleFile(file) {
+  if (song) {
+    song.stop();
+    song.disconnect();
+  }
+  song = loadSound(file, playSong);
+}
+
+function playSong() {
+  song.play();
+  loop();
 }
 
 class Particle {
@@ -101,6 +129,8 @@ class Particle {
       this.pos.add(this.vel);
       this.pos.add(this.vel);
       this.pos.add(this.vel);
+
+
     }
   }
 

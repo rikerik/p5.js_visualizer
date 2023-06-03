@@ -6,3 +6,27 @@ html, body {
 canvas {
   display: block;
 }
+
+.file-input {
+  width: 300px;
+  height: 20px;
+  border: 1px dashed #7e78d2;
+  border-radius: 3px;
+  padding: 10px;
+  text-align: center;
+  font-size: 14px;
+  color: #ffffff;
+  background-color: rgba(77, 71, 163, 0.5);
+  cursor: pointer;
+  transition: border-color 0.3s;
+}
+
+.file-input:hover {
+  border-color: #a49de1;
+}
+
+.hide {
+  display: none;
+}
+
+
