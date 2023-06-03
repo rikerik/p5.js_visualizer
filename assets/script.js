@@ -1,8 +1,8 @@
-var song;
-var fft;
-var img;
-var particles = [];
-var fileInput;
+let song;
+let fft;
+let img;
+let particles = [];
+let fileInput;
 
 function preload() {
   img = loadImage('assets/abstract.gif');
@@ -21,10 +21,7 @@ function setup() {
   fileInput.position(20, 20);
   fileInput.class('file-input');
 
-  // Check if the audio is playing initially
-  if (!song || !song.isPlaying()) {
-    fileInput.removeClass('hide');
-  }
+  toggleFileInputVisibility();
 }
 
 function windowResized() {
@@ -33,21 +30,19 @@ function windowResized() {
 
 function draw() {
   background(0);
-
   translate(width / 2, height / 2);
 
   fft.analyze();
-  var amp = fft.getEnergy(20, 200);
+  const amp = fft.getEnergy(20, 200);
 
   push();
   if (amp > 230) {
     rotate(random(-0.5, 0.5));
   }
-
   image(img, 0, 0, width + 100, height + 100);
   pop();
 
-  var alpha = map(amp, 0, 255, 180, 150);
+  const alpha = map(amp, 0, 255, 180, 150);
   fill(0, alpha);
   noStroke();
   rect(0, 0, width, height);
@@ -56,24 +51,23 @@ function draw() {
   strokeWeight(3);
   noFill();
 
-  var wave = fft.waveform();
-
-  for (var t = -1; t <= 1; t += 2) {
+  const wave = fft.waveform();
+  for (let t = -1; t <= 1; t += 2) {
     beginShape();
-    for (var i = 0; i <= 180; i += 0.5) {
-      var index = floor(map(i, 0, 180, 0, wave.length - 1));
-      var r = map(wave[index], -1, 1, 150, 350);
-      var x = r * sin(i) * t;
-      var y = r * cos(i);
+    for (let i = 0; i <= 180; i += 0.5) {
+      const index = floor(map(i, 0, 180, 0, wave.length - 1));
+      const r = map(wave[index], -1, 1, 150, 350);
+      const x = r * sin(i) * t;
+      const y = r * cos(i);
       vertex(x, y);
     }
     endShape();
   }
 
-  var p = new Particle();
+  const p = new Particle();
   particles.push(p);
 
-  for (var i = particles.length - 1; i >= 0; i--) {
+  for (let i = particles.length - 1; i >= 0; i--) {
     if (!particles[i].edges()) {
       particles[i].update(amp > 230);
       particles[i].show();
@@ -82,19 +76,14 @@ function draw() {
     }
   }
 
-  // Check if the audio is playing and update the file input visibility
-  if (song && song.isPlaying()) {
-    fileInput.addClass('hide');
-  } else {
-    fileInput.removeClass('hide');
-  }
+  toggleFileInputVisibility();
 }
 
-function mouseClicked() {
-  if (song && song.isPlaying()) {
+function mouseClicked(event) {
+  if (event.target !== fileInput.elt && song && song.isPlaying()) {
     song.pause();
     noLoop();
-  } else if (song) {
+  } else if (event.target !== fileInput.elt && song) {
     song.play();
     loop();
   }
@@ -113,6 +102,14 @@ function playSong() {
   loop();
 }
 
+function toggleFileInputVisibility() {
+  if (!song || !song.isPlaying()) {
+    fileInput.removeClass('hide');
+  } else {
+    fileInput.addClass('hide');
+  }
+}
+
 class Particle {
   constructor() {
     this.pos = p5.Vector.random2D().mult(250);
@@ -129,24 +126,21 @@ class Particle {
       this.pos.add(this.vel);
       this.pos.add(this.vel);
       this.pos.add(this.vel);
-
-
     }
   }
 
   edges() {
-    if (
+    return (
       this.pos.x < -width / 2 ||
       this.pos.x > width / 2 ||
       this.pos.y < -height / 2 ||
       this.pos.y > height / 2
-    ) {
-      return true
-    }
+    );
   }
+
   show() {
-    noStroke()
-    fill(this.color)
-    ellipse(this.pos.x, this.pos.y, this.w)
+    noStroke();
+    fill(this.color);
+    ellipse(this.pos.x, this.pos.y, this.w);
   }
 }
